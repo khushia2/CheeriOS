@@ -1,0 +1,77 @@
+Bug Log
+
+Bug: Only the first key would get echoed to the terminal. Subsequent key presses would not work
+Fix: used iret at the end of the interrupt handler and called send_eoi from the handler
+
+Bug: info mem would print PG disabled and screen would boot loop
+Fix 1: Did not set page_size field correctly for the page_directory entry for 4MB page.
+Fix 2: Reserved bit wasn't part of the struct for the page descriptor entries and page table entries.
+Fix 3: Added a "reserve" field as part of the struct.
+Fix 4: Allocated memory for page table and page directory in x86_desc.S    
+
+Bug: keyboard would not work at all.
+Fix: the order of inputs for outb was messed up. fixed it to (data, port) instead of (port, data)
+  
+Bug: keyboard priting extra blank space after every button press
+Fix: check for button depress and make sure we did not also print that
+
+Bug: keyboard scroll added green line halfway through terminal, did not add new text rows in correct spot
+Fix: Offsets were incorrect values, were for halway through terminal, multiplied them by 2 to fix
+
+Bug: Backspace could never go back to previous line even if enter was not pressed
+Fix: Check if enter was pressed, if not then allow to go back to previous line
+
+Bug: Frequency of RTC periodic interrupts were not changing.
+Fix: Was not using the right value in the outb command. Used value &= 0x0F instead.
+
+Bug: Character was not printing with the right frequency.
+Fix: Instead of putting the print statement in the test code, put it in rtc handler to print every interrupt.
+
+Bug: Page Fault occured when we tried to test our directory read function
+Fix: Dir_read function was passing dentry_t* directly to read_dentry_by_index function which was an unitialized pointer. Fixed it
+     by passing &(dentry_t)
+
+Bug: Contents of file would not print correctly for executables
+Fix: Used a for loop to print every character of the buffer and skipped printing of NULL characters. Using terminal_write now. Bug 
+     occured when terminal_write had not been implemented yet.
+
+Bug: Contents of file would not print correctly for frame0.txt/frame1.txt (only first half the image would get displayed)
+Fix: Our check to see if offset is within bounds and if correct number of bytes have been read were slightly wrong. Upon fixing those,
+     the contents of the files started printing correctly 
+
+Bug: Page fault at the end of execute when process was being halted
+Fix: Forgot to flush TLB after remapping to parent page. Flushing TLB fixed it
+
+Bug: General Protection Fault in Execute
+Fix: Did not set DPL to 3 for IDT entry pertaining to 0x80 (sys call). Setting DPL to 3 fixed the error
+
+Bug: Page fault in Execute
+Fix: Realized that User ESP address was not correctly calculated. Changed User ESP to 128MB + 4MB - 4 
+     which solved the problem 
+
+Bug: Open was not correctly finding a vacant fd to open a file
+Fix: Flag was not correctly being checked to find an open spot. Upon fixing that, open started working correctly
+
+Bug: Vidmap would not correctly get pointer to video memory
+Fix: Was not allocating page correctly, allocated correctly and got pointer to video memory
+
+Bug: After reaching maximum shell limit, it would say "no command found".
+Fix: Return 0 instead of -1 when maximum limit is reached.
+
+Bug: cat reads file but also says "file read failed".
+Fix: In file_read, if trying to read after reaching end of file, return 0 instead of -1.
+
+Bug: Screen would become green with black dots when switching terminals.
+Fix: Stopped reading from invalid memory location.
+
+Bug: Screen was always the same when switching between terminals.
+Fix: Terminal video memory pages were initialized to 0x8B, initialized to own memory location.
+
+Bug: Cursor only updated after typing when switching terminals.
+Fix: Called function to update cursor when terminal changes, not just when input is seen.
+
+Bug: Instead of 6, 7 programs were being executed.
+Fix: Changed the limiting if condition to only execute a process if process_num < 6 instead of process_num < 7.
+
+Bug: Correct number of programs in each terminal were not being executed.
+Fix: Was not updating the num of programs in each terminal correctly.
