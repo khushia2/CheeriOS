@@ -6,6 +6,6 @@ This project is a simple UNIX based Operating System built from scratch using C 
 * File system
 * Exception handling
 * Hardware Interrupts (keyboard, RTC)
-* System Call handling
+* System Calls
 * Scheduling
 * Multiple terminals
